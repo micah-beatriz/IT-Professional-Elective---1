@@ -1,1 +1,31 @@
+public class Main {
+    public static void main(String[] args) {
+        int num1 = 100;
+        int num2 = 50;
+        int x;
+
+        x = num1 + num2;
+        System.out.println("Addition: " + x);
+
+        x = num1 - num2;
+        System.out.println("Subtraction: " + x);
+
+        x = num1 * num2;
+        System.out.println("Multiplication: " + x);
+
+        if (num2 != 0) {
+            x = num1 / num2;
+            System.out.println("Division: " + x);
+        } else {
+            System.out.println("Cannot divide by zero!");
+        }
+        if (num1 > num2) {
+            System.out.println(num1 + " is greater than " + num2);
+        } else if (num1 < num2) {
+            System.out.println(num2 + " is greater than " + num1);
+        } else {
+            System.out.println("Both numbers are equal");
+        }
+    }
+}
 
