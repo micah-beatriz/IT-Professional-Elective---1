@@ -1,0 +1,61 @@
+package com.example.activitylifecycle
+
+import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+
+// MainActivity is the screen (Activity) of our app
+class MainActivity : AppCompatActivity() {
+
+    // This is a tag used to identify log messages in Logcat
+    private val TAG = "ActivityLifecycle"
+
+    // Called only ONCE when the activity is created for the first time
+    // This is where you usually set up the UI (layout) and initialize data
+    // Example: Load buttons, text fields, variables, database connections
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState) // calls the parent class version
+        setContentView(R.layout.activity_main) // shows the screen layout (XML file)
+        Log.d(TAG, "onCreate called") // print message in Logcat
+    }
+
+    // Called right AFTER onCreate (or after the activity comes back to visible state)
+    // The activity is now "visible" on the screen but the user cannot interact yet
+    // Example: Good place to start animations or prepare UI
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart called") // log message
+    }
+
+    // Called when the activity is now in the foreground and user can interact
+    // Example: User can click buttons, type text, scroll, etc.
+    // Also called again when coming back from background
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume called") // log message
+    }
+
+    // Called right BEFORE the activity goes into the background (like when another app opens
+    // in front, or user opens recent apps menu)
+    // Example: Pause videos, save draft data
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause called") // log message
+    }
+
+    // Called when the activity is NO LONGER visible to the user
+    // Example: Stop heavy tasks (like music playback if not wanted),
+    // or save app data so nothing is lost
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop called") // log message
+    }
+
+    // Called RIGHT BEFORE the activity is completely destroyed/closed
+    // Example: Clean up resources, close database connections
+    // Can be triggered when user closes the app OR system kills the app to free memory
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy called") // log message
+    }
+}
