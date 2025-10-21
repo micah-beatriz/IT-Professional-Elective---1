@@ -1,0 +1,92 @@
+MAINACTIVITY.KT
+package com.example.mainactivity
+
+import android.os.Bundle
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.ImageSwitcher
+import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    private var isFirstImage = true
+    private val images = intArrayOf(android.R.drawable.ic_menu_save, android.R.drawable.ic_menu_edit)
+    private var currentIndex = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val imageSwitcher = findViewById<ImageSwitcher>(R.id.imageSwitcher)
+        val switchButton = findViewById<Button>(R.id.switchImageButton)
+
+        imageSwitcher.setFactory {
+            val imageView = ImageView(applicationContext)
+            imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+            imageView.layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            imageView
+        }
+
+        imageSwitcher.setImageResource(images[currentIndex])
+
+        val inAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
+        val outAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
+        imageSwitcher.inAnimation = inAnimation
+        imageSwitcher.outAnimation = outAnimation
+
+        switchButton.setOnClickListener {
+            currentIndex = (currentIndex + 1) % images.size
+            imageSwitcher.setImageResource(images[currentIndex])
+        }
+    }
+}
+
+
+ACTIVITY_MAIN.XML
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/staticImageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@android:drawable/ic_dialog_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageSwitcher
+        android:id="@+id/imageSwitcher"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toTopOf="@id/switchImageButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/staticImageView"
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <Button
+        android:id="@+id/switchImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Switch Image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageSwitcher" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
