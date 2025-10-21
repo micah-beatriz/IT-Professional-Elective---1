@@ -1,0 +1,78 @@
+MAINACTIVITY.KT
+package com.example.mainactivity
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Spinner
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val countryAutoComplete: AutoCompleteTextView = findViewById(R.id.countryAutoComplete)
+        val countries = arrayOf("USA", "United Kingdom", "Canada", "Australia", "Germany")
+        val countryAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, countries)
+        countryAutoComplete.setAdapter(countryAdapter)
+
+        val categorySpinner: Spinner = findViewById(R.id.categorySpinner)
+        val categories = arrayOf("General Inquiry", "Technical Support", "Billing", "Feedback", "Other")
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        categorySpinner.adapter = spinnerAdapter
+    }
+}
+
+ACTIVIY_MAIN.XML
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/instructionsTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Please fill out the form below:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/nameEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Your Name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/instructionsTextView" />
+
+    <AutoCompleteTextView
+        android:id="@+id/countryAutoComplete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Country"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nameEditText" />
+
+    <Spinner
+        android:id="@+id/categorySpinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/countryAutoComplete" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
