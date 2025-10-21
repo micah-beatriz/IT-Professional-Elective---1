@@ -1,37 +1,70 @@
-COLORS.XML 
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+KOTLIN
+package com.example.mainactivity
 
-    <color name="primaryColor">#4A55A2</color>
-    <color name="surface_container_light">#F0F0F0</color>
-    <color name="outline_light">#D1D1D1</color>
-    <color name="text_secondary">#5A5A5A</color>
-</resources>
+import android.os.Bundle
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageSwitcher
+import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 
-BACKGROUND_BORDER.XML
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
+class MainActivity : AppCompatActivity() {
 
-    <solid android:color="@color/surface_container_light" />
+    private val images = intArrayOf(R.drawable.ic_save, R.drawable.ic_edit)
+    private var currentIndex = 0
+    private lateinit var imageSwitcher: ImageSwitcher // Declare here to access in helper function
 
-    <stroke
-        android:width="1dp"
-        android:color="@color/outline_light" />
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-    <corners android:radius="16dp" />
+        imageSwitcher = findViewById(R.id.imageSwitcher)
+        val switchButton = findViewById<Button>(R.id.switchImageButton)
 
-</shape>
+        imageSwitcher.setFactory {
+            val imageView = ImageView(applicationContext)
+            imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+            imageView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            imageView
+        }
 
-ACTIVITY_MAIN.XML
+        val inAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
+        val outAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
+        imageSwitcher.inAnimation = inAnimation
+        imageSwitcher.outAnimation = outAnimation
+
+        imageSwitcher.setImageResource(images[currentIndex])
+        updateContentDescription()
+
+        switchButton.setOnClickListener {
+            // Update the index, looping back to 0 if at the end
+            currentIndex = (currentIndex + 1) % images.size
+            // Set the new image resource
+            imageSwitcher.setImageResource(images[currentIndex])
+            // Update the accessibility description
+            updateContentDescription()
+        }
+    }
+
+    private fun updateContentDescription() {
+        val description = if (currentIndex == 0) "Save Icon" else "Edit Icon"
+        imageSwitcher.contentDescription = description
+    }
+}
+
+
+XML
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/pastel_lavender_accent"
     android:padding="24dp"
     tools:context=".MainActivity">
 
@@ -41,11 +74,12 @@ ACTIVITY_MAIN.XML
         android:layout_height="wrap_content"
         android:text="Image Preview"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-        app:layout_constraintVertical_chainStyle="packed"
+        android:textColor="@color/pastel_charcoal_text"
+        app:layout_constraintBottom_toTopOf="@id/switcherSubtitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/switcherSubtitle" />
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/switcherSubtitle"
@@ -53,19 +87,19 @@ ACTIVITY_MAIN.XML
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="Use the button below to switch images"
-        android:textColor="@color/text_secondary"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="@color/pastel_charcoal_text"
+        app:layout_constraintBottom_toTopOf="@id/imageSwitcher"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/switcherLabel"
-        app:layout_constraintBottom_toTopOf="@id/imageSwitcher" />
+        app:layout_constraintTop_toBottomOf="@id/switcherLabel" />
 
     <ImageSwitcher
         android:id="@+id/imageSwitcher"
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:layout_marginTop="24dp"
-        android:background="@drawable/background_border"
+        android:background="@drawable/background_border_pastel"
         android:elevation="4dp"
         app:layout_constraintBottom_toTopOf="@id/switchImageButton"
         app:layout_constraintEnd_toEndOf="parent"
@@ -78,9 +112,10 @@ ACTIVITY_MAIN.XML
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:backgroundTint="@color/primaryColor"
+        android:backgroundTint="@color/pastel_pink_primary"
         android:paddingVertical="12dp"
         android:text="Switch Image"
+        android:textColor="@color/pastel_charcoal_text"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -88,52 +123,3 @@ ACTIVITY_MAIN.XML
         app:layout_constraintTop_toBottomOf="@id/imageSwitcher" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-MAINACTIVITY.KT
-package com.example.mainactivity
-
-import android.os.Bundle
-import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.ImageSwitcher
-import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
-
-class MainActivity : AppCompatActivity() {
-
-    private var isFirstImage = true
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val imageSwitcher = findViewById<ImageSwitcher>(R.id.imageSwitcher)
-        val switchButton = findViewById<Button>(R.id.switchImageButton)
-
-        imageSwitcher.setFactory {
-            val imageView = ImageView(applicationContext)
-            imageView.scaleType = ImageView.ScaleType.FIT_CENTER
-            imageView
-        }
-
-        imageSwitcher.setImageResource(R.drawable.ic_save)
-        imageSwitcher.contentDescription = "Save Icon"
-
-        val inAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
-        val outAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
-        imageSwitcher.inAnimation = inAnimation
-        imageSwitcher.outAnimation = outAnimation
-
-        switchButton.setOnClickListener {
-            if (isFirstImage) {
-                imageSwitcher.setImageResource(R.drawable.ic_edit)
-                imageSwitcher.contentDescription = "Edit Icon"
-            } else {
-                imageSwitcher.setImageResource(R.drawable.ic_save)
-                imageSwitcher.contentDescription = "Save Icon"
-            }
-            isFirstImage = !isFirstImage
-        }
-    }
-}
-
