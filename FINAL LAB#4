@@ -1,0 +1,213 @@
+package com.example.sqlitenotesapp
+
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+    // Companion object holds static members, similar to 'static final' in Java
+    companion object {
+        private const val DATABASE_NAME = "MyNotes.db"
+        private const val DATABASE_VERSION = 1
+
+        const val TABLE_NOTES = "notes"
+        const val COLUMN_ID = "_id"
+        const val COLUMN_TITLE = "title"
+        const val COLUMN_CONTENT = "content"
+    }
+
+    override fun onCreate(db: SQLiteDatabase?) {
+        val createTableSql = """
+            CREATE TABLE $TABLE_NOTES (
+                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_TITLE TEXT NOT NULL,
+                $COLUMN_CONTENT TEXT
+            )
+        """.trimIndent()
+        db?.execSQL(createTableSql)
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_NOTES")
+        onCreate(db)
+    }
+
+    fun insertNote(title: String, content: String): Long {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_TITLE, title)
+            put(COLUMN_CONTENT, content)
+        }
+        val newRowId = db.insert(TABLE_NOTES, null, values)
+        db.close()
+        return newRowId
+    }
+
+    fun getAllNotes(): List<Pair<Int, String>> {
+        val notesList = mutableListOf<Pair<Int, String>>()
+        val selectQuery = "SELECT * FROM $TABLE_NOTES ORDER BY $COLUMN_ID DESC"
+        val db = this.readableDatabase
+        val cursor: Cursor = db.rawQuery(selectQuery, null)
+
+        // Using 'use' ensures the cursor and database are closed automatically
+        cursor.use {
+            if (it.moveToFirst()) {
+                do {
+                    val id = it.getInt(it.getColumnIndexOrThrow(COLUMN_ID))
+                    val title = it.getString(it.getColumnIndexOrThrow(COLUMN_TITLE))
+                    val content = it.getString(it.getColumnIndexOrThrow(COLUMN_CONTENT))
+                    notesList.add(Pair(id, "$title - $content"))
+                } while (it.moveToNext())
+            }
+        }
+        db.close()
+        return notesList
+    }
+
+    fun deleteNote(id: Int): Int {
+        val db = this.writableDatabase
+        val result = db.delete(TABLE_NOTES, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+        return result
+    }
+}
+
+
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/et_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Note Title" />
+
+    <EditText
+        android:id="@+id/et_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Note Content"
+        android:lines="3" />
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save Note" />
+
+    <ListView
+        android:id="@+id/list_notes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
+</LinearLayout>
+
+
+
+
+
+
+package com.example.sqlitenotesapp
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    // Use 'lateinit' for non-nullable properties initialized in onCreate
+    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var etTitle: EditText
+    private lateinit var etContent: EditText
+    private lateinit var btnSave: Button
+    private lateinit var listNotes: ListView
+    private lateinit var notesAdapter: ArrayAdapter<String>
+    private var notesWithIds: List<Pair<Int, String>> = listOf()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Initialize views
+        etTitle = findViewById(R.id.et_title)
+        etContent = findViewById(R.id.et_content)
+        btnSave = findViewById(R.id.btn_save)
+        listNotes = findViewById(R.id.list_notes)
+
+        dbHelper = DatabaseHelper(this)
+
+        // Set listeners
+        btnSave.setOnClickListener { saveNote() }
+
+        // Long-click listener for deleting notes (Part IV)
+        listNotes.setOnItemLongClickListener { _, _, position, _ ->
+            val selectedNoteId = notesWithIds[position].first
+            showDeleteConfirmationDialog(selectedNoteId)
+            true // Return true to indicate the event was handled
+        }
+
+        loadNotes()
+    }
+
+    private fun saveNote() {
+        val title = etTitle.text.toString().trim()
+        val content = etContent.text.toString().trim()
+
+        if (title.isEmpty()) {
+            Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val id = dbHelper.insertNote(title, content)
+        if (id != -1L) {
+            Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show()
+            etTitle.text.clear()
+            etContent.text.clear()
+            loadNotes() // Refresh the list
+        } else {
+            Toast.makeText(this, "Failed to save note", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun loadNotes() {
+        notesWithIds = dbHelper.getAllNotes()
+        val noteStrings = notesWithIds.map { it.second } // Get only the string part for display
+        notesAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, noteStrings)
+        listNotes.adapter = notesAdapter
+    }
+    
+    private fun showDeleteConfirmationDialog(noteId: Int) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Note")
+            .setMessage("Are you sure you want to delete this note?")
+            .setPositiveButton("Delete") { _, _ ->
+                // User clicked Delete button
+                deleteNoteAndRefresh(noteId)
+            }
+            .setNegativeButton("Cancel", null) // Do nothing on cancel
+            .show()
+    }
+
+    private fun deleteNoteAndRefresh(noteId: Int) {
+        val deletedRows = dbHelper.deleteNote(noteId)
+        if (deletedRows > 0) {
+            Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show()
+            loadNotes() // Refresh the list to show the change
+        } else {
+            Toast.makeText(this, "Error deleting note", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
